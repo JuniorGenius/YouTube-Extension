@@ -2835,6 +2835,11 @@ var skeleton = {
                             text: 'confirmationBeforeClosing',
                             tags: 'random prevent close exit'
                         },
+                        skip_link_confirmation: {
+                            component: 'switch',
+                            text: 'skipLinkConfirmation',
+                            tags: 'skip bypass external safety link confirmation are you sure leave'
+                        },
                         add_scroll_to_top: {
                             component: 'switch',
                             text: 'addScrollToTop',

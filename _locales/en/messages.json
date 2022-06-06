@@ -875,6 +875,9 @@
     "sidebar": {
         "message": "Sidebar"
     },
+    "skipLinkConfirmation": {
+        "message": "Skip external link confirmation"
+    },
     "spacebar": {
         "message": "Spacebar"
     },

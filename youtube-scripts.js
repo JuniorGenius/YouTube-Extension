@@ -2,17 +2,18 @@
 >>> TABLE OF CONTENTS:
 --------------------------------------------------------------------------------
 1.0 Global variable
-3.0 
+3.0
 4.0 Features
     4.1.0 General
       4.1.1 YouTube home page
       4.1.2 Collapse of subscription sections
       4.1.3 Add "Scroll to top"
       4.1.4 Confirmation before closing
-      4.1.5 Mark watched videos
-      4.1.6 Only one player instance playing
-      4.1.7 HD thumbnails
-      4.1.8 Add popup window buttons
+      4.1.5 Skip link confirmation
+      4.1.6 Mark watched videos
+      4.1.7 Only one player instance playing
+      4.1.8 HD thumbnails
+      4.1.9 Add popup window buttons
     4.2.0 Appearance
       4.2.1 Player
         4.2.1.1 Player size
@@ -309,7 +310,7 @@ ImprovedTube.ytElementsHandler = function (node) {
                 end: node.querySelector('#end'),
                 logo: node.querySelector('a#logo')
             };
-    
+
             this.improvedtubeYoutubeIcon();
             this.youtubeHomePage();
         }
@@ -324,17 +325,17 @@ ImprovedTube.ytElementsHandler = function (node) {
             ImprovedTube.elements.player_left_controls = node.querySelector('.ytp-left-controls');
             ImprovedTube.elements.player_thumbnail = node.querySelector('.ytp-cued-thumbnail-overlay-image');
             ImprovedTube.elements.player_subtitles_button = node.querySelector('.ytp-subtitles-button');
-    
+
             ImprovedTube.playerSize();
-    
+
             new MutationObserver(function (mutationList) {
                 for (var i = 0, l = mutationList.length; i < l; i++) {
                     var mutation = mutationList[i];
-    
+
                     if (mutation.type === 'childList') {
                         for (var j = 0, k = mutation.addedNodes.length; j < k; j++) {
                             var node = mutation.addedNodes[j];
-    
+
                             if (node.nodeName === 'DIV' && node.className.indexOf('ytp-ad-player-overlay') !== -1) {
                                 ImprovedTube.playerAds(node);
                             }
@@ -346,11 +347,11 @@ ImprovedTube.ytElementsHandler = function (node) {
                 childList: true,
                 subtree: true
             });
-    
+
             new MutationObserver(function (mutationList) {
                 for (var i = 0, l = mutationList.length; i < l; i++) {
                     var mutation = mutationList[i];
-    
+
                     if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
                         ImprovedTube.playerHdThumbnail();
                     }
@@ -916,6 +917,22 @@ ImprovedTube.confirmationBeforeClosing = function () {
     };
 };
 
+/*------------------------------------------------------------------------------
+4.1.5 SKIP LINK CONFIRMATION
+------------------------------------------------------------------------------*/
+
+ImprovedTube.skipLinkConfirmation = function () {
+    if (ImprovedTube.storage.skip_link_confirmation === true) {
+		let outgoing_links = document.querySelectorAll('a[href^="https://www.youtube.com/redirect"]');
+		for (let i = 0; i < outgoing_links.length; i++) {
+			let original_destination = outgoing_links[i].href;
+			let new_destination = decodeURIComponent(original_destination.split("&").filter(arg => arg.startsWith("q="))[0].substring(2));
+			outgoing_links[i].href = new_destination;
+			outgoing_links[i].data = null; // remove some YouTube specific stuff that tries to open youtube.com/redirect on click
+		}
+	}
+}
+
 
 /*------------------------------------------------------------------------------
 4.1.5 MARK WATCHED VIDEOS
@@ -1413,7 +1430,7 @@ ImprovedTube.howLongAgoTheVideoWasUploaded = function () {
         var date_element = document.querySelector('#info #info-text #info-strings yt-formatted-string');
 
         clearInterval(this.infoDateInterval);
-        
+
         if (!date_element) {
             this.infoDateInterval = setInterval(function () {
                 ImprovedTube.howLongAgoTheVideoWasUploaded();
@@ -1430,7 +1447,7 @@ ImprovedTube.howLongAgoTheVideoWasUploaded = function () {
             element.textContent = '• ' + string;
 
             ImprovedTube.elements.how_long_ago_the_video_was_uploaded = element;
-            
+
             document.querySelector('#info #info-text').appendChild(element);
         }
 
@@ -1485,7 +1502,7 @@ ImprovedTube.howLongAgoTheVideoWasUploaded = function () {
             if (response.error) {
                 if (date_element) {
                     var date = new Date(date_element.textContent);
-                    
+
                     append(timeSince(date));
                 }
             } else {
@@ -4495,6 +4512,7 @@ ImprovedTube.init = function () {
     window.addEventListener('DOMContentLoaded', function () {
         ImprovedTube.addScrollToTop();
         ImprovedTube.confirmationBeforeClosing();
+        ImprovedTube.skipLinkConfirmation();
         ImprovedTube.dim();
         ImprovedTube.font();
         ImprovedTube.themes();
@@ -4573,7 +4591,7 @@ new MutationObserver(function (mutationList) {
             try {
                 message = JSON.parse(message);
             } catch (error) {}
-            
+
             if (message){
                 if (message.storage) {
                     ImprovedTube.storage = message.storage;
